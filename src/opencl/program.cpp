@@ -43,10 +43,10 @@ using namespace std;
 namespace cppa {
 namespace opencl {
 
-program::program(context_ptr context, command_queue_ptr queue, program_ptr program)
-: m_context(move(context)), m_program(move(program)), m_queue(move(queue)) { }
+program::program(context_ptr context, command_queue_ptr queue, program_ptr program, const vector<cl_mem_flags>& mem_flags)
+    : m_context(move(context)), m_program(move(program)), m_queue(move(queue)), m_mem_flags(move(mem_flags)) { }
 
-program program::create(const char* kernel_source, const char* options, uint32_t device_id) {
+program program::create(const char* kernel_source, const vector<cl_mem_flags>& mem_flags, const char* options, uint32_t device_id) {
     auto metainfo = get_opencl_metainfo();
     auto devices  = metainfo->get_devices();
     auto context  = metainfo->m_context;
@@ -104,7 +104,7 @@ program program::create(const char* kernel_source, const char* options, uint32_t
         }
         throw runtime_error(oss.str());
     }
-    return {context, devices[device_id].m_cmd_queue, pptr};
+    return {context, devices[device_id].m_cmd_queue, pptr, mem_flags};
 }
 
 } // namespace opencl

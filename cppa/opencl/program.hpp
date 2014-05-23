@@ -58,15 +58,16 @@ class program {
      *        from a given @p kernel_source.
      * @returns A program object.
      */
-    static program create(const char* kernel_source, const char* options = nullptr, uint32_t device_id = 0);
+    static program create(const char* kernel_source, const std::vector<cl_mem_flags>& mem_flags = {}, const char* options = nullptr, uint32_t device_id = 0);
 
  private:
 
-    program(context_ptr context, command_queue_ptr queue, program_ptr program);
+    program(context_ptr context, command_queue_ptr queue, program_ptr program, const std::vector<cl_mem_flags>& mem_flags);
 
     context_ptr m_context;
     program_ptr m_program;
     command_queue_ptr m_queue;
+    std::vector<cl_mem_flags> m_mem_flags;
 
 };
 

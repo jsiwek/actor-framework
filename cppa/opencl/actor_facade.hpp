@@ -78,6 +78,17 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
            arg_mapping map_args, result_mapping map_result,
            const dim_vec& global_dims, const dim_vec& offsets,
            const dim_vec& local_dims, size_t result_size) {
+        const std::vector<cl_mem_flags> no_flags;
+        return create(prog, kernel_name, no_flags, map_args, map_result,
+                 global_dims, offsets, local_dims, result_size);
+    }
+
+    static intrusive_ptr<actor_facade>
+    create(const program& prog, const char* kernel_name,
+           const std::vector<cl_mem_flags>& mem_flags,
+           arg_mapping map_args, result_mapping map_result,
+           const dim_vec& global_dims, const dim_vec& offsets,
+           const dim_vec& local_dims, size_t result_size) {
         if (global_dims.empty()) {
             auto str = "OpenCL kernel needs at least 1 global dimension.";
             CPPA_LOGM_ERROR(detail::demangle(typeid(actor_facade)).c_str(),
@@ -114,7 +125,8 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
         }
         return new actor_facade<Ret (Args...)>{
             prog      , kernel             , global_dims          , offsets,
-            local_dims, std::move(map_args), std::move(map_result), result_size
+            local_dims, std::move(map_args), std::move(map_result), result_size,
+            mem_flags
         };
     }
 
@@ -134,7 +146,8 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
                  const dim_vec& global_offsets,
                  const dim_vec& local_dimensions,
                  arg_mapping map_args, result_mapping map_result,
-                 size_t result_size)
+                 size_t result_size,
+                 const std::vector<cl_mem_flags>& mem_flags)
       : m_kernel(kernel) , m_program(prog.m_program)
       , m_context(prog.m_context) , m_queue(prog.m_queue)
       , m_global_dimensions(global_dimensions)
@@ -143,6 +156,7 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
       , m_map_args(std::move(map_args))
       , m_map_result(std::move(map_result))
       , m_result_size(result_size)
+      , m_mem_flags(mem_flags)
     {
         CPPA_LOG_TRACE("id: " << this->id());
     }
@@ -179,6 +193,7 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
     arg_mapping m_map_args;
     result_mapping m_map_result;
     size_t m_result_size;
+    std::vector<cl_mem_flags> m_mem_flags;
 
     void add_arguments_to_kernel_rec(evnt_vec&, args_vec& arguments) {
         cl_int err{0};
@@ -196,10 +211,17 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
     template<typename T0, typename... Ts>
     void add_arguments_to_kernel_rec(evnt_vec& events, args_vec& arguments,
                                      T0& arg0, Ts&... args) {
+
         cl_int err{0};
+        cl_mem_flags flag{CL_MEM_READ_WRITE};
+        if(m_mem_flags.size()) {
+            flag = m_mem_flags.back();
+            m_mem_flags.pop_back();
+        }
+
         size_t buffer_size = sizeof(typename T0::value_type) * arg0.size();
         auto buffer = clCreateBuffer(m_context.get(),
-                                     CL_MEM_READ_ONLY,
+                                     flag,
                                      buffer_size,
                                      nullptr,
                                      &err);
@@ -227,8 +249,13 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
     void add_arguments_to_kernel(evnt_vec& events, args_vec& arguments,
                                  size_t ret_size, Ts&&... args) {
         arguments.clear();
+        cl_mem_flags flag{CL_MEM_READ_WRITE};
+        if(m_mem_flags.size()) {
+            flag = m_mem_flags.back();
+            m_mem_flags.pop_back();
+        }
         cl_int err{ 0 };
-        auto buf = clCreateBuffer(m_context.get(), CL_MEM_WRITE_ONLY,
+        auto buf = clCreateBuffer(m_context.get(), flag,
                                   sizeof(typename R::value_type) * ret_size,
                                   nullptr, &err);
         if (err != CL_SUCCESS) {

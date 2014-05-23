@@ -16,7 +16,7 @@ using namespace cppa::opencl;
 namespace {
 
 using ivec = vector<int>;
-using fvec = vector<float>;
+using mvec = vector<cl_mem_flags>;
 
 constexpr size_t matrix_size = 4;
 constexpr size_t array_size = 32;
@@ -27,6 +27,7 @@ constexpr const char* kernel_name = "matrix_square";
 constexpr const char* kernel_name_compiler_flag = "compiler_flag";
 constexpr const char* kernel_name_reduce = "reduce";
 constexpr const char* kernel_name_const = "const_mod";
+constexpr const char* kernel_name_mem_flag = "kernel_source_memory_flags";
 
 constexpr const char* compiler_flag = "-D OPENCL_CPPA_TEST_FLAG";
 
@@ -59,6 +60,15 @@ constexpr const char* kernel_source_compiler_flag = R"__(
 #else
         output[x] = 0;
 #endif
+    }
+)__";
+
+constexpr const char* kernel_source_memory_flags = R"__(
+    __kernel void kernel_source_memory_flags(
+                                 __read_only __global int* input,
+                                __write_only __global int* output) {
+        size_t x = get_global_id(0);
+        output[x] = input[x];
     }
 )__";
 
@@ -253,7 +263,7 @@ void test_opencl() {
     // test for opencl compiler flags
     ivec arr5(array_size);
     iota(begin(arr5), end(arr5), 0);
-    auto prog5 = program::create(kernel_source_compiler_flag, compiler_flag);
+    auto prog5 = program::create(kernel_source_compiler_flag, {}, compiler_flag);
     auto worker5 = spawn_cl<ivec(ivec&)>(prog5, kernel_name_compiler_flag, {array_size});
     self->send(worker5, move(arr5));
 
@@ -307,6 +317,23 @@ void test_opencl() {
         }
     );
 
+    // memory flags test
+    const mvec flags { CL_MEM_READ_ONLY, CL_MEM_WRITE_ONLY };
+    auto worker8 = spawn_cl<ivec(ivec&)>(kernel_source_memory_flags,
+                                         kernel_name_mem_flag,
+                                         flags,
+                                         {array_size});
+    ivec arr8(array_size);
+    iota(begin(arr8), end(arr8), 0);
+    self->send(worker8, move(arr8));
+
+    ivec expected6(array_size);
+    iota(begin(expected6), end(expected6), 0);
+    self->receive (
+        on_arg_match >> [&] (const ivec& result) {
+            CPPA_CHECK(equal(begin(expected6), end(expected6), begin(result)));
+        }
+    );
 }
 
 int main() {
