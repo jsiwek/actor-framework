@@ -49,22 +49,26 @@ class device_info {
                 command_queue_ptr queue,
                 size_t work_group_size,
                 cl_uint dimensons,
-                const dim_vec& items_per_dimension)
+                const dim_vec& items_per_dimension,
+                cl_bool image_support)
         : m_max_work_group_size(work_group_size)
         , m_max_dimensions(dimensons)
         , m_max_work_items_per_dim(items_per_dimension)
+        , m_image_support(image_support)
         , m_device(device)
         , m_cmd_queue(queue) { }
 
     inline size_t get_max_work_group_size();
     inline cl_uint get_max_dimensions();
     inline dim_vec get_max_work_items_per_dim();
+    inline cl_bool has_image_support();
 
  private:
 
     size_t  m_max_work_group_size;
     cl_uint m_max_dimensions;
     dim_vec m_max_work_items_per_dim;
+    cl_bool m_image_support;
     device_ptr m_device;
     command_queue_ptr m_cmd_queue;
 };
@@ -85,8 +89,11 @@ inline dim_vec device_info::get_max_work_items_per_dim() {
     return m_max_work_items_per_dim;
 }
 
+inline cl_bool device_info::has_image_support() { 
+    return m_image_support;
+}
+
 } // namespace opencl
 } // namespace cppa
-
 
 #endif // CPPA_OPENCL_DEVICE_INFO_HPP

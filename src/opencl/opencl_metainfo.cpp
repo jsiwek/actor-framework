@@ -165,11 +165,26 @@ void opencl_metainfo::initialize() {
                 CPPA_LOGMF(CPPA_ERROR, oss.str());
                 throw runtime_error(oss.str());
             }
+            cl_bool image_support = false;
+            err = clGetDeviceInfo(device.get(),
+                                  CL_DEVICE_IMAGE_SUPPORT,
+                                  sizeof(cl_bool),
+                                  &image_support,
+                                  &return_size);
+            if(err != CL_SUCCESS) {
+                ostringstream oss;
+                oss << "clGetDeviceInfo ("
+                    << "CL_DEVICE_IMAGE_SUPPORT): "
+                    << get_opencl_error(err);
+                CPPA_LOGMF(CPPA_ERROR, oss.str());
+                throw runtime_error(oss.str());
+            }
             device_info dev_info{device,
                                  cmd_queue,
                                  max_work_group_size,
                                  max_work_item_dimensions,
-                                 max_work_items_per_dim};
+                                 max_work_items_per_dim,
+                                 image_support};
             m_devices.push_back(move(dev_info));
         }
     }
