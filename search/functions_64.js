@@ -17,7 +17,6 @@ var searchData=
   ['disconnect',['disconnect',['../classcppa_1_1actor__companion.html#acbe6bc29ce19fcc660d575ccc01f1836',1,'cppa::actor_companion']]],
   ['dispose',['dispose',['../classcppa_1_1io_1_1continuable.html#a3c120182b98bbe5ba337f8ee141730b3',1,'cppa::io::continuable']]],
   ['do_5freceive',['do_receive',['../classcppa_1_1blocking__actor.html#a3822c5fdd730fd5ee2c1443575a37ec9',1,'cppa::blocking_actor']]],
-  ['dptr',['dptr',['../namespacecppa_1_1util.html#a2726d017bffe9712edcaa81805789843',1,'cppa::util']]],
   ['drop',['drop',['../classcppa_1_1any__tuple.html#a697eaa21a1ce464a00bc99cb14f19d6d',1,'cppa::any_tuple']]],
   ['drop_5fright',['drop_right',['../classcppa_1_1any__tuple.html#ad328da210a357ad83e00a3f6c2392f88',1,'cppa::any_tuple']]],
   ['duration',['duration',['../classcppa_1_1util_1_1duration.html#a298558656fcfb9afc42b05b2827847a9',1,'cppa::util::duration::duration(std::chrono::duration&lt; Rep, Period &gt; d)'],['../classcppa_1_1util_1_1duration.html#a6e9cba6d5ff405178d11a869a8a8cff6',1,'cppa::util::duration::duration(std::chrono::duration&lt; Rep, std::ratio&lt; 60, 1 &gt; &gt; d)']]],

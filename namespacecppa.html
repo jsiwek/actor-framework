@@ -23,7 +23,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">libcppa
-   &#160;<span id="projectnumber">Version 0.9.0</span>
+   &#160;<span id="projectnumber">0.9.2</span>
    </div>
   </td>
  </tr>
@@ -1173,6 +1173,10 @@ Variables</h2></td></tr>
 <tr class="memitem:a57b0bae78c0c9d497c3636398da1ecbe"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a57b0bae78c0c9d497c3636398da1ecbe"></a>
 constexpr <a class="el" href="structcppa_1_1invalid__actor__addr__t.html">invalid_actor_addr_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>invalid_actor_addr</b> = <a class="el" href="structcppa_1_1invalid__actor__addr__t.html">invalid_actor_addr_t</a>{}</td></tr>
 <tr class="separator:a57b0bae78c0c9d497c3636398da1ecbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea202e88a810b28d8c7370c5e058277b"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="structcppa_1_1util_1_1wrapped.html">util::wrapped</a><br class="typebreak"/>
+&lt; arg_match_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecppa.html#aea202e88a810b28d8c7370c5e058277b">arg_match</a> = <a class="el" href="structcppa_1_1util_1_1wrapped.html">util::wrapped</a>&lt;arg_match_t&gt;{}</td></tr>
+<tr class="memdesc:aea202e88a810b28d8c7370c5e058277b"><td class="mdescLeft">&#160;</td><td class="mdescRight">A wildcard that matches the argument types of a given callback. Must be the last argument to <a class="el" href="namespacecppa.html#a25d0d9e15f20fe8a0644a1d137d27e90">on()</a>.  <a href="#aea202e88a810b28d8c7370c5e058277b">More...</a><br/></td></tr>
+<tr class="separator:aea202e88a810b28d8c7370c5e058277b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3766bb0805c4b771f1b41d77f3f7a946"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3766bb0805c4b771f1b41d77f3f7a946"></a>
 constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>invalid_socket</b> = -1</td></tr>
 <tr class="separator:a3766bb0805c4b771f1b41d77f3f7a946"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1183,9 +1187,6 @@ static constexpr none_t&#160;</td><td class="memItemRight" valign="bottom"><b>no
 constexpr <a class="el" href="structcppa_1_1anything.html">anything</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecppa.html#a6fd601df8b1aff0ef276f80a103c5f4e">any_vals</a> = <a class="el" href="structcppa_1_1anything.html">anything</a>{}</td></tr>
 <tr class="memdesc:a6fd601df8b1aff0ef276f80a103c5f4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">A wildcard that matches any number of any values. <br/></td></tr>
 <tr class="separator:a6fd601df8b1aff0ef276f80a103c5f4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea202e88a810b28d8c7370c5e058277b"><td class="memItemLeft" align="right" valign="top">constexpr __unspecified__&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecppa.html#aea202e88a810b28d8c7370c5e058277b">arg_match</a></td></tr>
-<tr class="memdesc:aea202e88a810b28d8c7370c5e058277b"><td class="mdescLeft">&#160;</td><td class="mdescRight">A wildcard that matches the argument types of a given callback. Must be the last argument to <a class="el" href="namespacecppa.html#a25d0d9e15f20fe8a0644a1d137d27e90">on()</a>.  <a href="#aea202e88a810b28d8c7370c5e058277b">More...</a><br/></td></tr>
-<tr class="separator:aea202e88a810b28d8c7370c5e058277b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46d615a84f0e0e4eede5087ace98adfb"><td class="memItemLeft" align="right" valign="top">constexpr __unspecified__&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecppa.html#a46d615a84f0e0e4eede5087ace98adfb">on_arg_match</a></td></tr>
 <tr class="memdesc:a46d615a84f0e0e4eede5087ace98adfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Left-hand side of a partial function expression.  <a href="#a46d615a84f0e0e4eede5087ace98adfb">More...</a><br/></td></tr>
 <tr class="separator:a46d615a84f0e0e4eede5087ace98adfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1219,8 +1220,9 @@ constexpr <a class="el" href="classcppa_1_1spawn__options.html">spawn_options</a
 constexpr <a class="el" href="classcppa_1_1spawn__options.html">spawn_options</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecppa.html#a522ec04cb57018987ad6bfe5df75a023">blocking_api</a> = spawn_options::blocking_api_flag</td></tr>
 <tr class="memdesc:a522ec04cb57018987ad6bfe5df75a023"><td class="mdescLeft">&#160;</td><td class="mdescRight">Causes the new actor to opt in to the blocking API of libcppa, i.e., the actor uses a context-switching or thread-based backend instead of the default event-based implementation. <br/></td></tr>
 <tr class="separator:a522ec04cb57018987ad6bfe5df75a023"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a47b11e888dffba9f5b2fbca37eb83069"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classcppa_1_1spawn__options.html">spawn_options</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecppa.html#a47b11e888dffba9f5b2fbca37eb83069">priority_aware</a></td></tr>
-<tr class="memdesc:a47b11e888dffba9f5b2fbca37eb83069"><td class="mdescLeft">&#160;</td><td class="mdescRight">Causes the new actor to evaluate message priorities.  <a href="#a47b11e888dffba9f5b2fbca37eb83069">More...</a><br/></td></tr>
+<tr class="memitem:a47b11e888dffba9f5b2fbca37eb83069"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a47b11e888dffba9f5b2fbca37eb83069"></a>
+constexpr <a class="el" href="classcppa_1_1spawn__options.html">spawn_options</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecppa.html#a47b11e888dffba9f5b2fbca37eb83069">priority_aware</a> = spawn_options::priority_aware_flag</td></tr>
+<tr class="memdesc:a47b11e888dffba9f5b2fbca37eb83069"><td class="mdescLeft">&#160;</td><td class="mdescRight">Causes the new actor to evaluate message priorities. <br/></td></tr>
 <tr class="separator:a47b11e888dffba9f5b2fbca37eb83069"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -2474,7 +2476,7 @@ template&lt;typename T &gt; </div>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr __unspecified__ cppa::arg_match</td>
+          <td class="memname">constexpr __unspecified__ cppa::arg_match = <a class="el" href="structcppa_1_1util_1_1wrapped.html">util::wrapped</a>&lt;arg_match_t&gt;{}</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2520,27 +2522,10 @@ template&lt;typename T &gt; </div>
 </div><!-- fragment -->
 </div>
 </div>
-<a class="anchor" id="a47b11e888dffba9f5b2fbca37eb83069"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">constexpr <a class="el" href="classcppa_1_1spawn__options.html">spawn_options</a> cppa::priority_aware</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= spawn_options::priority_aware_flag</div>
-<div class="line">                                         + spawn_options::detach_flag</div>
-</div><!-- fragment -->
-<p>Causes the new actor to evaluate message priorities. </p>
-<dl class="section note"><dt>Note</dt><dd>This implicitly causes the actor to run in its own thread. </dd></dl>
-
-</div>
-</div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun May 4 2014 23:48:00 for libcppa by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri May 30 2014 14:52:28 for libcppa by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.5
 </small></address>
