@@ -30,6 +30,7 @@ add_unit_test(sync_send)
 add_unit_test(remote_actor ping_pong.cpp)
 add_unit_test(typed_remote_actor)
 add_unit_test(broker)
+add_unit_test(image_type)
 
 if (ENABLE_OPENCL)
   add_unit_test(opencl)

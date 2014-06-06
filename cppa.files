@@ -355,3 +355,5 @@ unit_testing/test_typed_spawn.cpp
 unit_testing/test_uniform_type.cpp
 unit_testing/test_yield_interface.cpp
 cppa/arg_match.hpp
+cppa/opencl/image_type.hpp
+unit_testing/test_image_type.cpp
