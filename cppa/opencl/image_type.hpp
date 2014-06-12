@@ -10,8 +10,7 @@
 namespace cppa {
 namespace opencl {
 
-typedef unsigned char uchar;
-typedef std::vector<uchar> uvec;
+typedef std::vector<float> fvec;
 
 class image_type {
 
@@ -19,7 +18,7 @@ class image_type {
 
     image_type() = default;
 
-    image_type(const uvec& data,
+    image_type(const fvec& data,
                const int width,
                const int height,
                const int bytes_per_line)
@@ -31,18 +30,18 @@ class image_type {
     image_type(const image_type&) = default;
     image_type& operator=(const image_type&) = default;
 
-    const uvec&  get_data() const;
-    int   get_width() const;
-    int   get_height() const;
-    int   get_bytes_per_line() const;
+    const fvec&  get_data() const;
+    int          get_width() const;
+    int          get_height() const;
+    int          get_bytes_per_line() const;
 
-    void set_data(uvec vec);
+    void set_data(fvec vec);
     void set_width(int width);
     void set_height(int height);
     void set_bytes_per_line(int bpl);
 
     static void announce() {
-        cppa::announce<uvec>();
+        cppa::announce<fvec>();
         cppa::announce<image_type>(
                     std::make_pair(&image_type::get_data,
                                    &image_type::set_data),
@@ -54,7 +53,7 @@ class image_type {
                                    &image_type::set_bytes_per_line));
     }
 
-    uvec m_data;
+    fvec m_data;
     int  m_width;
     int  m_height;
     int  m_bytes_per_line;
@@ -64,7 +63,7 @@ class image_type {
  *                 implementation of inline member functions                  *
 \******************************************************************************/
 
-const uvec& image_type::get_data() const {
+const fvec& image_type::get_data() const {
     return m_data;
 }
 
@@ -80,7 +79,7 @@ int image_type::get_bytes_per_line() const {
     return m_bytes_per_line;
 }
 
-void image_type::set_data(uvec vec) { m_data = std::move(vec); }
+void image_type::set_data(fvec vec) { m_data = std::move(vec); }
 void image_type::set_width(int width) { m_width = width; }
 void image_type::set_height(int height) { m_height = height; }
 void image_type::set_bytes_per_line(int bpl) { m_bytes_per_line = bpl; }

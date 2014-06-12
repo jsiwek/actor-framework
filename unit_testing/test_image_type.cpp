@@ -1,5 +1,5 @@
-
 #include <vector>
+#include <numeric>
 
 #include "test.hpp"
 #include "cppa/opencl/image_type.hpp"
@@ -11,12 +11,12 @@ using namespace cppa::opencl;
 
 namespace {
 
-typedef unsigned char uchar;
-typedef vector<uchar> uvec;
+typedef vector<float> fvec;
 
 void receiver(event_based_actor* self) {
     self->become(
         on_arg_match >> [=] (image_type& t) {
+            CPPA_CHECKPOINT();
             self->quit();
             return t;
         }
@@ -29,20 +29,17 @@ void test_image_type() {
     //    |                            |
     //    + ------send-img-back--------+
     // after receiving the img back check for equality
-    { // scoped actor
-        scoped_actor self;
-        uvec vec;
-        for(int i = 0; i < 100; ++i) {
-            vec.push_back(i);
+    scoped_actor self;
+    const size_t vec_size = 100;
+    fvec vec(vec_size);
+    iota(vec.begin(), vec.end(), vec_size);
+    image_type img(vec, vec_size, 1, vec_size);
+    self->sync_send(self->spawn(receiver), img).await(
+        on_arg_match >> [&](const image_type& t){
+            // this should pass...
+            CPPA_CHECK(equal(begin(img.get_data()), end(img.get_data()), begin(t.get_data())));
         }
-        image_type img(vec, 100, 1, 100);
-        self->sync_send(self->spawn(receiver), img).await(
-            on_arg_match >> [=](image_type& t){
-                // this should pass...
-                CPPA_CHECK(equal(begin(img.get_data()), end(img.get_data()), begin(t.get_data())));
-            }
-        );
-    } // scoped actor
+    );
 }
 
 }
@@ -55,4 +52,3 @@ int main() {
     shutdown();
     return CPPA_TEST_RESULT();
 }
-
