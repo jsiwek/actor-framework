@@ -3,7 +3,6 @@
 #define CPPA_IMAGE_TYPE_HPP
 
 #include <vector>
-
 #include "cppa/opencl/global.hpp"
 #include "cppa/opencl/smart_ptr.hpp"
 
@@ -11,6 +10,7 @@ namespace cppa {
 namespace opencl {
 
 typedef std::vector<float> fvec;
+typedef std::vector<size_t> svec;
 
 class image_type {
 
@@ -25,23 +25,17 @@ class image_type {
         : m_data(data)
         , m_width(width)
         , m_height(height)
-        , m_bytes_per_line(bytes_per_line) { }
+        , m_bytes_per_line(bytes_per_line)
+        , m_region{width, height, 0}
+        , m_origin{0, 0, 0}
+        , m_format{CL_RGBA, CL_FLOAT} { }
 
     image_type(const image_type&) = default;
     image_type& operator=(const image_type&) = default;
 
-    const fvec&  get_data() const;
-    int          get_width() const;
-    int          get_height() const;
-    int          get_bytes_per_line() const;
-
-    void set_data(fvec vec);
-    void set_width(int width);
-    void set_height(int height);
-    void set_bytes_per_line(int bpl);
-
     static void announce() {
         cppa::announce<fvec>();
+        cppa::announce<svec>();
         cppa::announce<image_type>(
                     std::make_pair(&image_type::get_data,
                                    &image_type::set_data),
@@ -53,36 +47,27 @@ class image_type {
                                    &image_type::set_bytes_per_line));
     }
 
-    fvec m_data;
-    int  m_width;
-    int  m_height;
-    int  m_bytes_per_line;
+    const fvec& get_data() const { return m_data; }
+    int get_width() const { return m_width; }
+    int get_height() const { return m_height; }
+    int get_bytes_per_line() const { return m_bytes_per_line; }
+    svec get_region() const { return m_region; }
+    svec get_origin() const { return m_origin; }
+    cl_image_format get_format() const { return m_format; }
+    void set_data(fvec vec) { m_data = std::move(vec); }
+    void set_width(int width) { m_width = width; }
+    void set_height(int height) { m_height = height; }
+    void set_bytes_per_line(int bpl) { m_bytes_per_line = bpl; }
+
+ private:
+    fvec                  m_data;
+    int                   m_width;
+    int                   m_height;
+    int                   m_bytes_per_line;
+    const svec            m_region;
+    const svec            m_origin;
+    cl_image_format       m_format;
 };
-
-/******************************************************************************\
- *                 implementation of inline member functions                  *
-\******************************************************************************/
-
-const fvec& image_type::get_data() const {
-    return m_data;
-}
-
-int image_type::get_width() const {
-    return m_width;
-}
-
-int image_type::get_height() const {
-    return m_height;
-}
-
-int image_type::get_bytes_per_line() const {
-    return m_bytes_per_line;
-}
-
-void image_type::set_data(fvec vec) { m_data = std::move(vec); }
-void image_type::set_width(int width) { m_width = width; }
-void image_type::set_height(int height) { m_height = height; }
-void image_type::set_bytes_per_line(int bpl) { m_bytes_per_line = bpl; }
 
 inline bool operator==(const image_type& lhs, const image_type& rhs) {
     return    lhs.get_data() == rhs.get_data()

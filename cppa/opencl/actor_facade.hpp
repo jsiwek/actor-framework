@@ -51,6 +51,7 @@
 #include "cppa/opencl/command.hpp"
 #include "cppa/opencl/program.hpp"
 #include "cppa/opencl/smart_ptr.hpp"
+#include "cppa/opencl/image_type.hpp"
 
 namespace cppa {
 namespace opencl {
@@ -209,22 +210,65 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
     }
 
     template<typename T0, typename... Ts>
-    void add_arguments_to_kernel_rec(evnt_vec& events, args_vec& arguments,
-                                     T0& arg0, Ts&... args) {
-
+    typename std::enable_if<std::is_same<image_type,
+                                         typename T0::value_type>::value>::type
+    add_arguments_to_kernel_rec(evnt_vec& events, args_vec& arguments,
+                                T0& arg0, Ts&... args) {
         cl_int err{0};
         cl_mem_flags flag{CL_MEM_READ_WRITE};
-        if(m_mem_flags.size()) {
+        if (m_mem_flags.size()) {
             flag = m_mem_flags.back();
             m_mem_flags.pop_back();
         }
+        auto& img = arg0.front();
+        auto format = img.get_format();
+        cl_mem buffer = clCreateImage2D(m_context.get(), flag,
+                                        &format,
+                                        img.get_width(),
+                                        img.get_height(),
+                                        0,
+                                        nullptr,
+                                        &err);
+        if (err != CL_SUCCESS) {
+            CPPA_LOGMF(CPPA_ERROR, "clCreateImage2D: " << get_opencl_error(err));
+            return;
+        }
+        cl_event event;
+        clEnqueueWriteImage(m_queue.get(), buffer, CL_FALSE,
+                        img.get_origin().data(),
+                        img.get_region().data(),
+                        0,
+                        0,
+                        img.get_data().data(),
+                        0,
+                        nullptr,
+                        &event);
+        if (err != CL_SUCCESS) {
+            CPPA_LOGMF(CPPA_ERROR, "clEnqueueWriteImage: "
+                                   << get_opencl_error(err));
+            return;
+        }
+        push_arg(&events, arguments, buffer, &event);
+        add_arguments_to_kernel_rec(events, arguments, args...);
+    }
 
+    template<typename T0, typename... Ts>
+    typename std::enable_if<!std::is_same<image_type,
+                                          typename T0::value_type>::value>::type
+    add_arguments_to_kernel_rec(evnt_vec& events, args_vec& arguments,
+                                T0& arg0, Ts&... args) {
+        cl_int err{0};
+        cl_mem_flags flag{CL_MEM_READ_WRITE};
+        if (m_mem_flags.size()) {
+            flag = m_mem_flags.back();
+            m_mem_flags.pop_back();
+        }
         size_t buffer_size = sizeof(typename T0::value_type) * arg0.size();
-        auto buffer = clCreateBuffer(m_context.get(),
-                                     flag,
-                                     buffer_size,
-                                     nullptr,
-                                     &err);
+        cl_mem buffer = clCreateBuffer(m_context.get(),
+                                       flag,
+                                       buffer_size,
+                                       nullptr,
+                                       &err);
         if (err != CL_SUCCESS) {
             CPPA_LOGMF(CPPA_ERROR, "clCreateBuffer: " << get_opencl_error(err));
             return;
@@ -238,11 +282,18 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
                                    << get_opencl_error(err));
             return;
         }
-        events.push_back(std::move(event));
+        push_arg(&events, arguments, buffer, &event);
+        add_arguments_to_kernel_rec(events, arguments, args...);
+    }
+
+    void push_arg(evnt_vec* events, args_vec& arguments, cl_mem& buffer,
+                  cl_event* event) {
+        if(events != nullptr && event != nullptr) {
+            events->push_back(std::move(*event));
+        }
         mem_ptr tmp;
         tmp.adopt(std::move(buffer));
         arguments.push_back(tmp);
-        add_arguments_to_kernel_rec(events, arguments, args...);
     }
 
     template<typename R, typename... Ts>
@@ -254,7 +305,7 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
             flag = m_mem_flags.back();
             m_mem_flags.pop_back();
         }
-        cl_int err{ 0 };
+        cl_int err{0};
         auto buf = clCreateBuffer(m_context.get(), flag,
                                   sizeof(typename R::value_type) * ret_size,
                                   nullptr, &err);
@@ -262,12 +313,9 @@ class actor_facade<Ret(Args...)> : public abstract_actor {
             CPPA_LOGMF(CPPA_ERROR, "clCreateBuffer: " << get_opencl_error(err));
             return;
         }
-        mem_ptr tmp;
-        tmp.adopt(std::move(buf));
-        arguments.push_back(tmp);
+        push_arg(nullptr, arguments, buf, nullptr);
         add_arguments_to_kernel_rec(events, arguments, std::forward<Ts>(args)...);
     }
-
 };
 
 } // namespace opencl
