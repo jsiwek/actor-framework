@@ -7,11 +7,11 @@ include_directories(${LIBCAF_INCLUDE_DIRS})
 
 macro(add_unit_test name)
   add_executable(test_${name} test_${name}.cpp test.cpp ${ARGN})
-  target_link_libraries(test_${name}
-                        ${CMAKE_DL_LIBS}
-                        ${LIBCAF_CORE_LIBRARY}
-                        ${LIBCAF_IO_LIBRARY}
-                        ${PTHREAD_LIBRARIES})
+  if (${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+    target_link_libraries(test_${name} ${CMAKE_DL_LIBS} ${LIBCAF_CORE_LIBRARY} ${LIBCAF_IO_LIBRARY} ${PTHREAD_LIBRARIES} -lexecinfo)
+  else ()
+    target_link_libraries(test_${name} ${CMAKE_DL_LIBS} ${LIBCAF_CORE_LIBRARY} ${LIBCAF_IO_LIBRARY} ${PTHREAD_LIBRARIES})
+  endif ()
   add_test(${name} ${EXECUTABLE_OUTPUT_PATH}/test_${name})
   add_dependencies(test_${name} all_unit_tests)
 endmacro()
