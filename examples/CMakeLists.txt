@@ -11,13 +11,20 @@ else ()
   set(WSLIB)
 endif ()
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+  set(EXECILIB -lexecinfo)
+else ()
+  set(EXECILIB)
+endif ()
+
 macro(add name folder)
   add_executable(${name} ${folder}/${name}.cpp ${ARGN})
   target_link_libraries(${name}
                         ${CMAKE_DL_LIBS}
 			${LIBCAF_LIBRARIES}
                         ${PTHREAD_LIBRARIES}
-                        ${WSLIB})
+                        ${WSLIB}
+                        ${EXECILIB})
   add_dependencies(${name} all_examples)
 endmacro()
 
