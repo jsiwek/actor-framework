@@ -73,16 +73,10 @@ std::string filter_whitespaces(const char* cstr, size_t size = 0) {
   std::string demangle(const char* decorated) {
     using std::string;
     size_t size;
-    int status;
+    int status = 0;
     std::unique_ptr<char, void (*)(void*)> undecorated{
       abi::__cxa_demangle(decorated, nullptr, &size, &status), std::free};
-#if defined(CAF_BSD)
-    // It seems that FreeBSD return the wrong (positive) status value
-    // for some good results
-    if (status < 0) {
-#else
     if (status != 0) {
-#endif
       // try again with _Z to work around some weird issues on FreeBSD
       if (strncmp(decorated, "_Z", 2) != 0) {
         string tmp = "_Z";
