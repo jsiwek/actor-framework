@@ -101,7 +101,7 @@
 #   endif
 #elif defined(WIN32) || defined(_WIN32)
 #  define CAF_WINDOWS
-#elif defined(__FreeBSD_)
+#elif defined(__FreeBSD__)
 #  define CAF_BSD
 #else
 #  error Platform and/or compiler not supportet
