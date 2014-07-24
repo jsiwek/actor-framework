@@ -137,6 +137,9 @@ install(DIRECTORY libcaf_core/cppa/ DESTINATION include/cppa FILES_MATCHING PATT
 # install includes from io
 install(DIRECTORY libcaf_io/caf/ DESTINATION include/caf FILES_MATCHING PATTERN "*.hpp")
 
+# install includes from opencl
+install(DIRECTORY libcaf_opencl/caf/ DESTINATION include/caf FILES_MATCHING PATTERN "*.hpp")
+
 # process cmake_uninstall.cmake.in
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
                "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
@@ -147,10 +150,11 @@ add_custom_target(uninstall
                   COMMAND ${CMAKE_COMMAND} -P
                   ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
-# set path to caf core & io headers for subdirectories
+# set path to caf core & io, opencl headers for subdirectories
 set (LIBCAF_INCLUDE_DIRS
      ${CMAKE_SOURCE_DIR}/libcaf_core
-     ${CMAKE_SOURCE_DIR}/libcaf_io)
+     ${CMAKE_SOURCE_DIR}/libcaf_io
+     ${CMAKE_SOURCE_DIR}/libcaf_opencl)
 
 # set up subdirectories, todo: allow configure option to disable io
 add_subdirectory(libcaf_core)
@@ -160,8 +164,13 @@ add_subdirectory(libcaf_io)
 # set io lib for sub directories
 set (LIBCAF_IO_LIBRARY libcaf_io)
 add_dependencies(libcaf_io libcaf_core)
+# set opencl lib for sub directories
+add_subdirectory(libcaf_opencl)
+set (LIBCAF_OPENCL_LIBRARY libcaf_opencl)
+add_dependencies(libcaf_opencl libcaf_core)
+
 # set list variable for sub directories
-set (LIBCAF_LIBRARIES ${LIBCAF_CORE_LIBRARY} ${LIBCAF_IO_LIBRARY})
+set (LIBCAF_LIBRARIES ${LIBCAF_CORE_LIBRARY} ${LIBCAF_IO_LIBRARY} ${LIBCAF_OPENCL_LIBRARY})
 
 if (NOT "${CAF_NO_UNIT_TESTS}" STREQUAL "yes")
   enable_testing()
