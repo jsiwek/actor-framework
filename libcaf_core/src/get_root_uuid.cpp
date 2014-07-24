@@ -20,13 +20,13 @@
 #include "caf/config.hpp"
 #include "caf/detail/get_root_uuid.hpp"
 
-#ifndef CAF_MACOS // not needed on Mac OS X
+#if !defined(CAF_MACOS) && !defined(CAF_BSD) // not needed on Mac OS X
 namespace {
 constexpr char uuid_format[] = "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF";
 } // namespace <anonmyous>
 #endif // CAF_MACOS
 
-#ifdef CAF_MACOS
+#if defined(CAF_MACOS) || defined(CAF_BSD)
 
 namespace {
 
@@ -36,11 +36,16 @@ inline void erase_trailing_newline(std::string& str) {
   }
 }
 
+#if defined(CAF_MACOS)
 constexpr const char* s_get_uuid =
   "/usr/sbin/diskutil info / | "
   "/usr/bin/awk '$0 ~ /UUID/ { print $3 }'";
-
+#else
+constexpr const char* s_get_uuid =
+  "/sbin/sysctl -a | /usr/bin/grep uuid | "
+  "/usr/bin/awk '$0 ~ /kern.hostuuid:/ { print $2 }'";
 } // namespace <anonymous>
+#endif
 
 namespace caf {
 namespace detail {
