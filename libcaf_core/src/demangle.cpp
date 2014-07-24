@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+#include <cstring>
 #include <cstdlib>
 #include <stdexcept>
 
@@ -76,6 +77,12 @@ std::string filter_whitespaces(const char* cstr, size_t size = 0) {
     std::unique_ptr<char, void (*)(void*)> undecorated{
       abi::__cxa_demangle(decorated, nullptr, &size, &status), std::free};
     if (status != 0) {
+      // try again with _Z to work around some weird issues on FreeBSD
+      if (strncmp(decorated, "_Z", 2) != 0) {
+        string tmp = "_Z";
+        tmp += decorated;
+        return demangle(tmp.c_str());
+      }
       string error_msg = "Could not demangle type name ";
       error_msg += decorated;
       throw std::logic_error(error_msg);
