@@ -77,6 +77,8 @@ std::string filter_whitespaces(const char* cstr, size_t size = 0) {
     std::unique_ptr<char, void (*)(void*)> undecorated{
       abi::__cxa_demangle(decorated, nullptr, &size, &status), std::free};
 #if defined(CAF_BSD)
+    // It seems that FreeBSD return the wrong (positive) status value
+    // for some good results
     if (status < 0) {
 #else
     if (status != 0) {
