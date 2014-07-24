@@ -76,7 +76,11 @@ std::string filter_whitespaces(const char* cstr, size_t size = 0) {
     int status;
     std::unique_ptr<char, void (*)(void*)> undecorated{
       abi::__cxa_demangle(decorated, nullptr, &size, &status), std::free};
+#if defined(CAF_BSD)
+    if (status < 0) {
+#else
     if (status != 0) {
+#endif
       // try again with _Z to work around some weird issues on FreeBSD
       if (strncmp(decorated, "_Z", 2) != 0) {
         string tmp = "_Z";
