@@ -35,13 +35,13 @@ namespace detail {
 
 namespace {
 
-std::atomic<abstract_singleton*> s_plugins[singletons::max_plugin_singletons];
-std::atomic<scheduler::abstract_coordinator*> s_scheduling_coordinator;
-std::atomic<uniform_type_info_map*> s_uniform_type_info_map;
-std::atomic<actor_registry*> s_actor_registry;
-std::atomic<group_manager*> s_group_manager;
-std::atomic<node_id::data*> s_node_id;
-std::atomic<logging*> s_logger;
+singletons::container<abstract_singleton> s_plugins[singletons::max_plugins];
+singletons::container<scheduler::abstract_coordinator> s_scheduling_coordinator;
+singletons::container<uniform_type_info_map> s_uniform_type_info_map;
+singletons::container<actor_registry> s_actor_registry;
+singletons::container<group_manager> s_group_manager;
+singletons::container<node_id::data> s_node_id;
+singletons::container<logging> s_logger;
 
 } // namespace <anonymous>
 
@@ -50,6 +50,7 @@ abstract_singleton::~abstract_singleton() {
 }
 
 void singletons::stop_singletons() {
+  // stop singletons, i.e., make sure no background threads/actors are running
   CAF_LOGF_DEBUG("stop scheduler");
   stop(s_scheduling_coordinator);
   CAF_LOGF_DEBUG("stop plugins");
@@ -62,7 +63,7 @@ void singletons::stop_singletons() {
   stop(s_uniform_type_info_map);
   stop(s_logger);
   stop(s_node_id);
-  // dispose singletons
+  // dispose singletons, i.e., release memory
   dispose(s_scheduling_coordinator);
   for (auto& plugin : s_plugins) dispose(plugin);
   dispose(s_actor_registry);
@@ -89,8 +90,7 @@ scheduler::abstract_coordinator* singletons::get_scheduling_coordinator() {
 }
 
 bool singletons::set_scheduling_coordinator(scheduler::abstract_coordinator*p) {
-  scheduler::abstract_coordinator* expected = nullptr;
-  return s_scheduling_coordinator.compare_exchange_weak(expected, p);
+  return lazy_get(s_scheduling_coordinator, [p] { return p; }) == p;
 }
 
 node_id singletons::get_node_id() {
@@ -99,7 +99,8 @@ node_id singletons::get_node_id() {
 
 logging* singletons::get_logger() { return lazy_get(s_logger); }
 
-std::atomic<abstract_singleton*>& singletons::get_plugin_singleton(size_t id) {
+singletons::container<abstract_singleton>&
+singletons::get_plugin_singleton(size_t id) {
   CAF_REQUIRE(id < max_plugin_singletons);
   return s_plugins[id];
 }

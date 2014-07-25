@@ -17,9 +17,10 @@
  * http://www.boost.org/LICENSE_1_0.txt.                                      *
  ******************************************************************************/
 
-#ifndef CAF_SINGLETON_MANAGER_HPP
-#define CAF_SINGLETON_MANAGER_HPP
+#ifndef CAF_DETAIL_SINGLETONS_HPP
+#define CAF_DETAIL_SINGLETONS_HPP
 
+#include <mutex>
 #include <atomic>
 #include <cstddef> // size_t
 
@@ -43,18 +44,22 @@ class abstract_singleton {
 };
 
 class singletons {
+ public:
+  template<typename T>
+  struct container {
+    std::atomic<T*> ptr;
+    std::mutex mtx;
+  };
 
   singletons() = delete;
 
- public:
-
-  static constexpr size_t max_plugin_singletons = 3;
+  static constexpr size_t max_plugins = 3;
 
   static constexpr size_t middleman_plugin_id = 0;   // io lib
 
-  static constexpr size_t opencl_plugin_id = 1;    // OpenCL lib
+  static constexpr size_t opencl_plugin_id = 1;      // OpenCL lib
 
-  static constexpr size_t probe_plugin_id = 2;     // probe hooks
+  static constexpr size_t probe_plugin_id = 2;       // probe hooks
 
   static logging* get_logger();
 
@@ -82,71 +87,51 @@ class singletons {
   static void stop_singletons();
 
  private:
+  static container<abstract_singleton>& get_plugin_singleton(size_t id);
 
-  static std::atomic<abstract_singleton*>& get_plugin_singleton(size_t id);
-
-  /*
-   * @brief Type @p T has to provide: <tt>static T* create_singleton()</tt>,
-   *    <tt>void initialize()</tt>, <tt>void destroy()</tt>,
-   *    and <tt>dispose()</tt>.
-   * The constructor of T shall be lightweigt, since more than one object
-   * might get constructed initially.
-   * <tt>dispose()</tt> is called on objects with failed CAS operation.
-   * <tt>initialize()</tt> is called on objects with succeeded CAS operation.
-   * <tt>destroy()</tt> is called during shutdown on initialized objects.
-   *
-   * Both <tt>dispose</tt> and <tt>destroy</tt> must delete the object
-   * eventually.
-   */
-  template <class T, typename Factory>
-  static T* lazy_get(std::atomic<T*>& ptr, Factory f) {
-    T* result = ptr.load();
-    while (result == nullptr) {
-      auto tmp = f();
-      // double check if singleton is still undefined
-      if (ptr.load() == nullptr) {
-        tmp->initialize();
-        if (ptr.compare_exchange_weak(result, tmp)) {
-          result = tmp;
-        } else {
-          tmp->stop();
-          tmp->dispose();
-        }
-      } else {
-        tmp->dispose();
+  // Get instance from @p ptr or crate it on-the-fly using DCLP
+  template <class T, class Factory>
+  static T* lazy_get(container<T>& data, Factory f) {
+    auto result = data.ptr.load(std::memory_order_acquire);
+    if (result == nullptr) {
+      std::lock_guard<std::mutex> guard(data.mtx);
+      result = data.ptr.load(std::memory_order_relaxed);
+      if (result == nullptr) {
+        result = f();
+        result->initialize();
+        data.ptr.store(result, std::memory_order_release);
       }
     }
     return result;
   }
 
   template <class T>
-  static T* lazy_get(std::atomic<T*>& ptr) {
-    return lazy_get(ptr, [] { return T::create_singleton(); });
+  static T* lazy_get(container<T>& data) {
+    return lazy_get(data, [] { return T::create_singleton(); });
   }
 
   template <class T>
-  static void stop(std::atomic<T*>& ptr) {
-    auto p = ptr.load();
+  static void stop(container<T>& data) {
+    auto p = data.ptr.load();
     if (p) p->stop();
   }
 
   template <class T>
-  static void dispose(std::atomic<T*>& ptr) {
+  static void dispose(container<T>& data) {
+    auto p = data.ptr.load();
     for (;;) {
-      auto p = ptr.load();
       if (p == nullptr) {
         return;
-      } else if (ptr.compare_exchange_weak(p, nullptr)) {
+      }
+      if (data.ptr.compare_exchange_weak(p, nullptr)) {
         p->dispose();
-        ptr = nullptr;
         return;
       }
     }
   }
-
 };
 
 } // namespace detail
 } // namespace caf
 
-#endif // CAF_SINGLETON_MANAGER_HPP
+#endif // CAF_DETAIL_SINGLETONS_HPP
