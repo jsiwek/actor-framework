@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.7"/>
-<title>libcaf: Main Page</title>
+<title>libcaf: libcaf</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -37,6 +37,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li class="current"><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="modules.html"><span>Modules</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
+      <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li><a href="examples.html"><span>Examples</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -61,7 +65,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-</div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Namespaces</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Friends</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(9)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -72,13 +76,85 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div class="header">
   <div class="headertitle">
-<div class="title">libcaf Documentation</div>  </div>
+<div class="title">libcaf </div>  </div>
 </div><!--header-->
 <div class="contents">
-</div><!-- contents -->
+<div class="textblock"><dl class="section author"><dt>Author</dt><dd>Dominik Charousset &lt;dominik.charousset (at) haw-hamburg.de&gt;</dd></dl>
+<h1><a class="anchor" id="Intro"></a>
+Introduction</h1>
+<p>This library provides an implementation of the actor model for C++. It uses a network transparent messaging system to ease development of both concurrent and distributed software.</p>
+<p><code>libcaf</code> uses a thread pool to schedule actors by default. A scheduled actor should not call blocking functions. Individual actors can be spawned (created) with a special flag to run in an own thread if one needs to make use of blocking APIs.</p>
+<p>Writing applications in <code>libcaf</code> requires a minimum of gluecode and each context <em>is</em> an actor. Even main is implicitly converted to an actor if needed.</p>
+<h1><a class="anchor" id="GettingStarted"></a>
+Getting Started</h1>
+<p>To build <code>libcaf,</code> you need `GCC &gt;= 4.7 or <code>Clang &gt;= 3.2</code>, and <code>CMake</code>.</p>
+<p>The usual build steps on Linux and Mac OS X are:</p>
+<ul>
+<li><code>mkdir build -</code>cd build</li>
+<li><code>cmake .. -</code>make</li>
+<li><p class="startli">`make install (as root, optionally)</p>
+<p class="startli">Please run the unit tests as well to verify that <code>libcaf</code> works properly.</p>
+</li>
+<li><p class="startli">`./bin/unit_tests</p>
+<p class="startli">Please submit a bug report that includes (a) your compiler version, (b) your OS, and (c) the output of the unit tests if an error occurs.</p>
+<p class="startli">Windows is not supported yet, because MVSC++ doesn't implement the C++11 features needed to compile <code>libcaf</code>.</p>
+<p class="startli">Please read the <b>Manual</b> for an introduction to <code>libcaf</code>. It is available online as HTML at <a href="http://neverlord.github.com/libcaf/manual/index.html">http://neverlord.github.com/libcaf/manual/index.html</a> or as PDF at <a href="http://neverlord.github.com/libcaf/manual/manual.pdf">http://neverlord.github.com/libcaf/manual/manual.pdf</a></p>
+</li>
+</ul>
+<h1><a class="anchor" id="IntroHelloWorld"></a>
+Hello World Example</h1>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"></div>
+<div class="line"><span class="preprocessor">#include &quot;caf/all.hpp&quot;</span></div>
+<div class="line"></div>
+<div class="line"><span class="keyword">using namespace </span>std;</div>
+<div class="line"><span class="keyword">using namespace </span>caf;</div>
+<div class="line"></div>
+<div class="line"><a class="code" href="classcaf_1_1behavior.html">behavior</a> mirror(<a class="code" href="classcaf_1_1event__based__actor.html">event_based_actor</a>* <span class="keyword">self</span>) {</div>
+<div class="line">  <span class="comment">// return the (initial) actor behavior</span></div>
+<div class="line">  <span class="keywordflow">return</span> {</div>
+<div class="line">    <span class="comment">// a handler for messages containing a single string</span></div>
+<div class="line">    <span class="comment">// that replies with a string</span></div>
+<div class="line">    [=](<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; what) -&gt; <span class="keywordtype">string</span> {</div>
+<div class="line">      <span class="comment">// prints &quot;Hello World!&quot; via aout (thread-safe cout wrapper)</span></div>
+<div class="line">      aout(<span class="keyword">self</span>) &lt;&lt; what &lt;&lt; endl;</div>
+<div class="line">      <span class="comment">// terminates this actor (&#39;become&#39; otherwise loops forever)</span></div>
+<div class="line">      <span class="keyword">self</span>-&gt;quit();</div>
+<div class="line">      <span class="comment">// reply &quot;!dlroW olleH&quot;</span></div>
+<div class="line">      <span class="keywordflow">return</span> string(what.rbegin(), what.rend());</div>
+<div class="line">    }</div>
+<div class="line">  };</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">void</span> hello_world(<a class="code" href="classcaf_1_1event__based__actor.html">event_based_actor</a>* <span class="keyword">self</span>, <span class="keyword">const</span> <a class="code" href="classcaf_1_1actor.html">actor</a>&amp; buddy) {</div>
+<div class="line">  <span class="comment">// send &quot;Hello World!&quot; to our buddy ...</span></div>
+<div class="line">  <span class="keyword">self</span>-&gt;sync_send(buddy, <span class="stringliteral">&quot;Hello World!&quot;</span>).then(</div>
+<div class="line">    <span class="comment">// ... wait for a response ...</span></div>
+<div class="line">    [=](<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; what) {</div>
+<div class="line">      <span class="comment">// ... and print it</span></div>
+<div class="line">      aout(<span class="keyword">self</span>) &lt;&lt; what &lt;&lt; endl;</div>
+<div class="line">    }</div>
+<div class="line">  );</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">int</span> main() {</div>
+<div class="line">  <span class="comment">// create a new actor that calls &#39;mirror()&#39;</span></div>
+<div class="line">  <span class="keyword">auto</span> mirror_actor = <a class="code" href="group___actor_creation.html#gadf1d60e6ce94df89f9b589bb61198aaf">spawn</a>(mirror);</div>
+<div class="line">  <span class="comment">// create another actor that calls &#39;hello_world(mirror_actor)&#39;;</span></div>
+<div class="line">  <a class="code" href="group___actor_creation.html#gadf1d60e6ce94df89f9b589bb61198aaf">spawn</a>(hello_world, mirror_actor);</div>
+<div class="line">  <span class="comment">// wait until all other actors we have spawned are done</span></div>
+<div class="line">  <a class="code" href="namespacecaf.html#a3c6fe9cd57f8c7a05d8f774de2c450fe">await_all_actors_done</a>();</div>
+<div class="line">  <span class="comment">// run cleanup code before exiting main</span></div>
+<div class="line">  <a class="code" href="namespacecaf.html#ae81ec892720a081de187e74fe1b3b2d0">shutdown</a>();</div>
+<div class="line">}</div>
+</div><!-- fragment --><h1><a class="anchor" id="IntroMoreExamples"></a>
+More Examples</h1>
+<p>The <a class="el" href="">Math Actor Example</a> shows the usage of <a class="el" href="">receive_loop</a> and <a class="el" href="namespacecaf.html#aa07320f4a961c5791979c4b44a73b50f">arg_match</a>. The <a class="el" href="dining_philosophers_8cpp-example.html">Dining Philosophers Example</a> introduces event-based actors and includes a lot of `libcaf features. </p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Jul 24 2014 11:03:54 for libcaf by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Jul 28 2014 03:24:07 for libcaf by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.7
 </small></address>
