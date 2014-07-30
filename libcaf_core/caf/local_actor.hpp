@@ -371,6 +371,26 @@ class local_actor : public extend<abstract_actor>::with<mixin::memory_cached> {
     on_sync_failure(fun);
   }
 
+  /**
+   * Sets a custom exception handler for this actor. If multiple handlers are
+   * defined, only the functor that was added first is being executed.
+   * @returns `true` if `f` was successfully attached to the actor,
+   *          otherwise (actor already exited) `false`.
+   */
+  template <class F>
+  bool set_exception_handler(F f) {
+    struct functor_attachable : attachable {
+      F m_functor;
+      functor_attachable(F arg) : m_functor(std::move(arg)) {
+        // nop
+      }
+      optional<uint32_t> handle_exception(const std::exception_ptr& eptr) {
+        return m_functor(eptr);
+      }
+    };
+    return attach(attachable_ptr{new functor_attachable(std::move(f))});
+  }
+
   /**************************************************************************
    *        here be dragons: end of public interface        *
    **************************************************************************/

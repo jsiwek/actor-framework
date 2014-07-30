@@ -97,9 +97,6 @@ class abstract_actor : public abstract_channel {
       void actor_exited(uint32_t reason) {
         m_functor(reason);
       }
-      bool matches(const attachable::token&) {
-        return false;
-      }
     };
     return attach(attachable_ptr{new functor_attachable(std::move(f))});
   }
@@ -220,6 +217,13 @@ class abstract_actor : public abstract_channel {
   inline void host(execution_unit* new_host) {
     m_host = new_host;
   }
+
+  /** @cond PRIVATE */
+  /*
+   * Tries to run a custom exception handler for `eptr`.
+   */
+  optional<uint32_t> handle(const std::exception_ptr& eptr);
+  /** @endcond */
 
  private:
   // cannot be changed after construction

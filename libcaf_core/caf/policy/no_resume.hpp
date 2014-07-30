@@ -34,6 +34,7 @@ class no_resume {
         this->on_exit();
         this->cleanup(reason);
       };
+      std::exception_ptr eptr = nullptr;
       try {
         this->act();
         done_cb(exit_reason::normal);
@@ -42,7 +43,21 @@ class no_resume {
         done_cb(e.reason());
       }
       catch (...) {
-        done_cb(exit_reason::unhandled_exception);
+        eptr = std::current_exception();
+      }
+      if (eptr) {
+        uint32_t reason = exit_reason::unhandled_exception;
+        try {
+          auto opt_reason = this->handle(eptr);
+          if (opt_reason) {
+            // use exit reason defined by custom handler
+            reason = *opt_reason;
+          }
+        }
+        catch (...) {
+          // just ignore it
+        }
+        done_cb(reason);
       }
       return resumable::done;
     }

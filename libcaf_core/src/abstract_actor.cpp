@@ -217,6 +217,20 @@ void abstract_actor::cleanup(uint32_t reason) {
   }
 }
 
+optional<uint32_t> abstract_actor::handle(const std::exception_ptr& eptr) {
+  optional<uint32_t> result;
+  { // lifetime scope of guard
+    guard_type guard{m_mtx};
+    for (auto& handler : m_attachables) {
+      result = handler->handle_exception(eptr);
+      if (result) {
+        return result;
+      }
+    }
+  }
+  return none;
+}
+
 std::set<std::string> abstract_actor::interface() const {
   // defaults to untyped
   return std::set<std::string>{};

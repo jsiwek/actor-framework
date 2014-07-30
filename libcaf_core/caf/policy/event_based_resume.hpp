@@ -82,18 +82,19 @@ class event_based_resume {
              d->planned_exit_reason() != exit_reason::not_exited;
 
       };
-      // actors without behavior or that have already defined
-      // an exit reason must not be resumed
-      CAF_REQUIRE(!d->m_initialized || !actor_done());
-      if (!d->m_initialized) {
-        d->m_initialized = true;
-        auto bhvr = d->make_behavior();
-        if (bhvr) d->become(std::move(bhvr));
-        // else: make_behavior() might have just called become()
-        if (actor_done() && done_cb()) return resume_result::done;
-        // else: enter resume loop
-      }
+      std::exception_ptr eptr = nullptr;
       try {
+        // actors without behavior or that have already defined
+        // an exit reason must not be resumed
+        CAF_REQUIRE(!d->m_initialized || !actor_done());
+        if (!d->m_initialized) {
+          d->m_initialized = true;
+          auto bhvr = d->make_behavior();
+          if (bhvr) d->become(std::move(bhvr));
+          // else: make_behavior() might have just called become()
+          if (actor_done() && done_cb()) return resume_result::done;
+          // else: enter resume loop
+        }
         for (;;) {
           auto ptr = d->next_message();
           if (ptr) {
@@ -133,19 +134,36 @@ class event_based_resume {
         if (d->exit_reason() == exit_reason::not_exited) {
           d->quit(what.reason());
         }
+        eptr = std::current_exception();
       }
       catch (std::exception& e) {
-        CAF_LOG_WARNING("actor died because of exception: "
+        CAF_LOG_INFO("actor died because of exception: "
                  << detail::demangle(typeid(e))
                  << ", what() = " << e.what());
         if (d->exit_reason() == exit_reason::not_exited) {
           d->quit(exit_reason::unhandled_exception);
         }
+        eptr = std::current_exception();
       }
       catch (...) {
-        CAF_LOG_WARNING("actor died because of an unknown exception");
+        CAF_LOG_INFO("actor died because of an unknown exception");
         if (d->exit_reason() == exit_reason::not_exited) {
           d->quit(exit_reason::unhandled_exception);
+        }
+        eptr = std::current_exception();
+      }
+      if (eptr) {
+        // just in case...
+        try {
+          auto opt_reason = d->handle(eptr);
+          if (opt_reason) {
+            // use exit reason defined by custom handler
+            d->quit(*opt_reason);
+          }
+        }
+        catch (...) {
+          CAF_LOG_WARNING("custom exception handler did throw");
+          // just ignore it
         }
       }
       done_cb();
