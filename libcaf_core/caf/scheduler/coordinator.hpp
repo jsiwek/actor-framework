@@ -72,7 +72,7 @@ protected:
       w->start();
     // launch thread for dispatching timeouts and delayed messages
     timer_ = std::thread{[&] {
-      clock_.run_dispatch_loop();
+      clock().run_dispatch_loop();
     }};
     // run remaining startup code
     super::start();
@@ -134,7 +134,7 @@ protected:
       policy_.foreach_resumable(w.get(), f);
     policy_.foreach_central_resumable(this, f);
     // stop timer thread
-    clock_.cancel_dispatch_loop();
+    clock().cancel_dispatch_loop();
     timer_.join();
   }
 
